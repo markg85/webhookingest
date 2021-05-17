@@ -15,10 +15,12 @@ fastify.post('/:id', async (request, reply) => {
     // Add body to IPFS.
     let output = await ipfs.add(Buffer.from(JSON.stringify(request.body)));
 
+    let publishObject = { timestamp: Date.now(), cid: output.path}
+
     // And publish on our channel
     await ipfs.pubsub.publish(`__openpubsubnetwork.addChannel`, channel);
-    await ipfs.pubsub.publish(`__openpubsubnetwork.pin`, output.path);
-    await ipfs.pubsub.publish(channel, output.path);
+    await ipfs.pubsub.publish(`__openpubsubnetwork.pin`, Buffer.from(JSON.stringify(publishObject)));
+    await ipfs.pubsub.publish(channel, Buffer.from(JSON.stringify(publishObject)));
     return {}
 })
 
